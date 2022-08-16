@@ -1,9 +1,16 @@
 <template>
-  <nav>
-    <router-view></router-view>
-  </nav>
+  <div>
+    <client-order-screen></client-order-screen>
+  </div>
 </template>
-
+<script>
+import ClientOrderScreen from './components/ClientOrderScreen.vue'
+export default {
+  components: {
+    ClientOrderScreen
+  }
+}
+</script>
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

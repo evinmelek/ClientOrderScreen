@@ -1,5 +1,9 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
+import './registerServiceWorker' 
+//import asyncomputed from 'vue3-async-computed'
 
-createApp(App).use(router).mount('#app')
+ 
+createApp(App) 
+//.use(asyncomputed)
+.mount('#app')
