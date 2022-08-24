@@ -82,17 +82,7 @@
         </div>
       </div>
     </div>
-    <div class="wrapper">
-      <div class="wrapper-box">
-        <div id="box">
-          <ul>
-            <li v-for="subtitle of notes" :key="subtitle.id">
-              <p @click="scroll_right">{{subtitle.text}}</p>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    <SubtitleComponent></SubtitleComponent>
   </div>
   <div v-for="precall in callsettings" :key="precall.id">
     <audio v-if="precall.status==true" @click="play(call)" id="call" controls :src="precall.precall"
@@ -101,159 +91,136 @@
   </div>
 </template>
 
-<script> 
+<script>
+import SubtitleComponent from './SubtitleComponent.vue' 
 //importing backend api url 
 const BASE_URL = "http://localhost:3000"
 export default {
-  data(){
-    return{  
-        //objects are api endpoints
-      orders: {
-         orderno: ""
-      },
-      advertisements: {
-        adstatus: "",
-        file: ""
-      },
-      generalsettings: {
-         timestatus: "",
-         close: "",
-         logostatus: "",
-         companylogo: ""
-      }, 
-      backgroundsettings: {
-        imagestatus: "",
-        color: "",
-        image: ""
-      }, 
-      callsettings: {
-        status: "",
-        precall: ""
-      },
-      soundsettings: {
-        soundstatus: "",
-        sound: ""
-      },
-      notes: {
-        title: "",
-        text: ""
-      }, 
-      data: null, 
-    } 
-  },
-  watch: {   
-  },
-  computed: {  
-  },
-  methods: {
-    //fetching data from different api endpoints with methods named different
-    async getPreCall() {  
-      fetch(BASE_URL + "/api/orders") 
-        .then(response => response.json())
-        .then(data => {
-          (this.orders = data)
-          for (data of data) {
-            data.orderno = !data.orderno  
-            this.$emit("input", data.orderno)
-            console.log(" Precall Status is: ", data.orderno[0]) 
-          }
-        })
-        .catch(error => { console.log(error) })
-    },
-    async getOrder() {  
-      fetch(BASE_URL + "/api/orders")
-        .then(response => response.json())
-        .then(data => (this.orders = data.slice(-6).sort((a,b) => {  //get last 6 data
-          if(a.id > b.id) return this.getPrecall()   //and sort from biggest id to smallest id
-          return 0})
-          ))         
+    data() {
+        return {
+            //objects are api endpoints
+            orders: {
+                orderno: ""
+            },
+            advertisements: {
+                adstatus: "",
+                file: ""
+            },
+            generalsettings: {
+                timestatus: "",
+                close: "",
+                logostatus: "",
+                companylogo: ""
+            },
+            backgroundsettings: {
+                imagestatus: "",
+                color: "",
+                image: ""
+            },
+            callsettings: {
+                status: "",
+                precall: ""
+            },
+            soundsettings: {
+                soundstatus: "",
+                sound: ""
+            },
+            data: null,
+        };
     }, 
-    async getAd(){ 
-      fetch(BASE_URL +"/api/advertisements")
-        .then(response => response.json())
-        .then(data => (this.advertisements = data.slice(-1)))
-        .catch(error=>{console.log(error)}) 
-    },  
-    async getSound(){ 
-      fetch(BASE_URL + "/api/soundsettings")
-        .then(response => response.json())
-        .then(data => (this.soundsettings = data.slice(-1)))
-        .catch(error=>{console.log(error)}) 
+    methods: {
+        //fetching data from different api endpoints with methods named different
+        async getPreCall() {
+            fetch(BASE_URL + "/api/orders")
+                .then(response => response.json())
+                .then(data => {
+                (this.orders = data);
+                for (data of data) {
+                    data.orderno = !data.orderno;
+                    this.$emit("input", data.orderno);
+                    console.log(" Precall Status is: ", data.orderno[0]);
+                }
+            })
+                .catch(error => { console.log(error); });
+        },
+        async getOrder() {
+            fetch(BASE_URL + "/api/orders")
+                .then(response => response.json())
+                .then(data => (this.orders = data.slice(-6).sort((a, b) => {
+                if (a.id > b.id)
+                    return this.getPrecall(); //and sort from biggest id to smallest id
+                return 0;
+            })));
+        },
+        async getAd() {
+            fetch(BASE_URL + "/api/advertisements")
+                .then(response => response.json())
+                .then(data => (this.advertisements = data.slice(-1)))
+                .catch(error => { console.log(error); });
+        },
+        async getSound() {
+            fetch(BASE_URL + "/api/soundsettings")
+                .then(response => response.json())
+                .then(data => (this.soundsettings = data.slice(-1)))
+                .catch(error => { console.log(error); });
+        },
+        async getPrecall() {
+            fetch(BASE_URL + "/api/callsettings")
+                .then(response => response.json())
+                .then(data => (this.callsettings = data))
+                .catch(error => { console.log(error); });
+        },
+        async getBackground() {
+            fetch(BASE_URL + "/api/backgroundsettings")
+                .then(response => response.json())
+                .then(data => (this.backgroundsettings = data))
+                .catch(error => { console.log(error); });
+        },
+        async getGeneralSettings() {
+            fetch(BASE_URL + "/api/generalsettings")
+                .then(response => response.json())
+                .then(data => (this.generalsettings = data.slice(-1)))
+                .catch(error => { console.log(error); });
+        }, 
+        getTime() {
+            const today = new Date();
+            const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+            this.time = time;
+        },
     },
-    async getPrecall(){
-      fetch(BASE_URL + "/api/callsettings")
-        .then(response => response.json())
-        .then(data => (this.callsettings = data))
-        .catch(error=>{console.log(error)})   
+    async mounted() {
+        console.log("mounted...");
+        this.getOrder();
+        this.getAd();
+        this.getTime();
+        this.getPrecall();
+        this.getBackground();
+        this.getGeneralSettings(); 
     },
-    async getBackground() { 
-      fetch(BASE_URL + "/api/backgroundsettings")
-        .then(response => response.json())
-        .then(data => (this.backgroundsettings = data))
-        .catch(error=>{console.log(error)}) 
-    }, 
-    async getGeneralSettings() {
-      fetch(BASE_URL + "/api/generalsettings")
-        .then(response => response.json())
-        .then(data => (this.generalsettings = data.slice(-1)))
-        .catch(error=>{console.log(error)})    
+    created() {
+        console.log("created...");
+        this.interval = setInterval(() => {
+            this.getOrder();
+        }, 1000); // getting data every second
+        this.interval = setInterval(() => {
+            this.getAd();
+        }, 100000); //getting data every minute
+        this.interval = setInterval(() => {
+            this.getTime();
+        });
+        this.interval = setInterval(() => {
+            this.getGeneralSettings();
+            this.hourIndex++;
+        }, 100000);
+        this.interval = setInterval(() => {
+            this.getBackground();
+        }, 100000); 
     },
-    scrollLeft() {
-      let content = document.querySelector(".wrapper-box")
-      content.scrollLeft += 15
-      window.setTimeout(function(){location.reload()},150000)
+    unmounted() {
+        console.log("unmounted...");
+        clearInterval(this.interval);
     },
-    getTime() {
-        const today = new Date() 
-        const time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()  
-        this.time = time
-    },
-    async getSubtitle() {         
-      fetch(BASE_URL + "/api/notes")
-        .then(response => response.json())
-        .then(data => (this.notes = data.slice(-1)))
-        .catch(error=>{console.log(error)})   
-    },
-  }, 
-  async mounted() { 
-    console.log("mounted...")      
-    this.getOrder()
-    this.getAd()  
-    this.getTime()
-    this.getPrecall()
-    this.getBackground()
-    this.getGeneralSettings()
-    this.getSubtitle()  
- 
-  },
-  created(){ 
-    console.log("created...") 
-    this.interval = setInterval(() =>{
-    this.getOrder()},1000)  // getting data every second
-  
-    this.interval = setInterval(() =>{
-    this.getAd()},100000)  //getting data every minute
-
-    this.interval = setInterval(() =>{
-    this.getTime()}) 
-
-    this.interval = setInterval(() =>{
-    this.getGeneralSettings()
-    this.hourIndex++},100000) 
-    
-    this.interval = setInterval(() =>{
-    this.getBackground()},100000) 
-
-    this.interval = setInterval(() =>{
-    this.getSubtitle()},1000)   
-    
-    this.interval = setInterval(() =>{
-    this.scrollLeft()},150)  // scrolling text to left
-  },
-  unmounted(){
-    console.log("unmounted...")
-    clearInterval(this.interval)
-  },  
+    components: { SubtitleComponent }
 }
 </script>
 
@@ -425,52 +392,6 @@ a{
   position: absolute;
   width: 100%;
   bottom: 0px; 
-} 
-.wrapper ul{
-  list-style-type: none;   
-  float: center;
-}
-.wrapper li { 
-  list-style-type: none; 
-}
-.wrapper p{
-  height: 100px;
-  width: 100%;
-  font-size: 220%; 
-  margin-top: 0%; 
-} 
-.wrapper {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  margin-top: 45%;
-  height: 150px;
-  width: 99.5%; 
-}
-.wrapper-box {
-  max-width: 101%;
-  overflow: hidden;
-  bottom:0px;
-  position:fixed;
-}
-#box {
-  width: 18000px;
-  height: 90px;
-  text-align: left; 
-  padding-left: 95%; 
-  border: 1px solid black;
-  position: relative;
-  background-color: black;
-  color: white; 
-  font-size: 120%; 
-}
-#box div {
-  position: absolute;
-  height: 50%;
-  width: 50px; 
-  left: 0;
 } 
 .num{
   position: absolute;
